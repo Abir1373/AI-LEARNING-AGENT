@@ -2,14 +2,23 @@ import { FaMoon, FaSun } from "react-icons/fa";
 import useTheme from "../hooks/useTheme";
 import { Link } from "react-router";
 import Logo from "./Logo";
+import useAuth from "../hooks/useAuth";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
-
+  const { user, logOut } = useAuth();
+  console.log(user);
   const handleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
+  const handleLogout = () => {
+    logOut()
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((error) => console.log(error));
+  };
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
@@ -46,7 +55,11 @@ const Navbar = () => {
               <Link to="/dashboard">Dashboard</Link>
             </li>
             <li>
-              <Link to="/login">Login</Link>
+              {user ? (
+                <span onClick={() => handleLogout()}>Logout</span>
+              ) : (
+                <Link to="/login">Login</Link>
+              )}
             </li>
           </ul>
         </div>
@@ -68,7 +81,11 @@ const Navbar = () => {
             <Link to="/dashboard">Dashboard</Link>
           </li>
           <li>
-            <Link to="/login">Login</Link>
+            {user ? (
+              <span onClick={() => handleLogout()}>Logout</span>
+            ) : (
+              <Link to="/login">Login</Link>
+            )}
           </li>
         </ul>
       </div>

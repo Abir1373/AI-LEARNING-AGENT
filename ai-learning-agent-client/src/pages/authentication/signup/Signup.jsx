@@ -1,5 +1,9 @@
 import { useForm } from "react-hook-form";
-import { Link, useLocation } from "react-router";
+import { Link, useNavigate } from "react-router";
+import useAuth from "../../../hooks/useAuth";
+import { useState } from "react";
+import useAxios from "../../../hooks/useAxios";
+import Swal from "sweetalert2";
 
 const Signup = () => {
   const {
@@ -8,11 +12,54 @@ const Signup = () => {
     formState: { errors },
   } = useForm();
 
-  const location = useLocation();
-  const from = location.state?.from || "/";
+  const { createUser, updateUserProfile } = useAuth();
+
+  const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const axiosInstance = useAxios();
 
   const onSubmit = (data) => {
     console.log(data);
+
+    createUser(data.email, data.password)
+      .then(async (result) => {
+        console.log(result.user);
+
+        //update userInfo in the database
+        const userInfo = {
+          email: data.email,
+          role: "user",
+          dob: data.dob,
+          image: data.image,
+          name: data.name,
+          occupation: data.occupation,
+          password: data.password,
+          phone: data.phone,
+        };
+        const userRes = await axiosInstance.post("/users", userInfo);
+        console.log(userRes.data);
+
+        // update user profile in firebase
+        const userProfile = {
+          displayName: data.name,
+          photoURL: data.image,
+        };
+        updateUserProfile(userProfile)
+          .then(() => {
+            console.log("profile name pic updated");
+            Swal.fire({
+              title: "Signup Complete!",
+              icon: "success",
+              draggable: true,
+            });
+            navigate("/login");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      })
+      .catch((error) => console.error(error));
   };
 
   return (
@@ -56,7 +103,6 @@ const Signup = () => {
                 )}
               </div>
             </div>
-
             {/* Phone + Date of Birth */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -92,7 +138,6 @@ const Signup = () => {
                 )}
               </div>
             </div>
-
             {/* Occupation + Profile Image */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -138,12 +183,11 @@ const Signup = () => {
                 )}
               </div>
             </div>
-
             {/* Password - full width */}
             <div>
               <label className="label">Password</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 {...register("password", {
                   required: "Password is required",
                   minLength: {
@@ -167,7 +211,18 @@ const Signup = () => {
               )}
             </div>
 
-            <button className="btn btn-primary text-black mt-4 w-full">
+            {/* Show Password */}
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+              />
+              <span className="text-sm">Show Password</span>
+            </div>
+
+            <button className="btn btn-primary text-white mt-4 w-full">
               Sign Up
             </button>
           </fieldset>
@@ -175,7 +230,7 @@ const Signup = () => {
           <p className="mt-4 text-center">
             <small>
               Already have an account?{" "}
-              <Link state={{ from }} className="btn btn-link" to="/login">
+              <Link className="btn btn-link" to="/login">
                 Login
               </Link>
             </small>

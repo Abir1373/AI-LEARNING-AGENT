@@ -1,17 +1,35 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+import Swal from "sweetalert2";
+import useAuth from "../../../hooks/useAuth";
 
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { signIn } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-
-  const onSubmit = (data) => {
-    console.log(data);
-  };
+  const location = useLocation();
+  const navigate = useNavigate();
   const from = location.state?.from || "/";
+
+  const onSubmit = async (data) => {
+    await signIn(data.email, data.password);
+
+    Swal.fire({
+      icon: "success",
+      title: "Welcome Back!",
+      text: "You have logged in successfully",
+      confirmButtonColor: "#92400e",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
+    navigate(from);
+  };
 
   return (
     <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
@@ -29,7 +47,7 @@ const Login = () => {
 
             <label className="label">Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               {...register("password", {
                 required: "Password is required",
                 minLength: {
@@ -50,7 +68,18 @@ const Login = () => {
               <p className="text-red-500">{errors.password.message}</p>
             )}
 
-            <button className="btn btn-primary text-black mt-4">Login</button>
+            {/* Show Password */}
+            <div className="flex items-center gap-2 mt-1">
+              <input
+                type="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+              />
+              <span className="text-sm">Show Password</span>
+            </div>
+
+            <button className="btn btn-primary text-white mt-4">Login</button>
           </fieldset>
           <p>
             <small>
