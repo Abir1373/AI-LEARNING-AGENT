@@ -2,8 +2,20 @@ import { Outlet, NavLink } from "react-router";
 import { FaRegUser } from "react-icons/fa";
 import { TbLayoutSidebarRightExpandFilled } from "react-icons/tb";
 import Navbar from "../components/Navbar";
+import useAuth from "../hooks/useAuth";
+import useUserRole from "../hooks/useUserRole";
+import { LuActivity } from "react-icons/lu";
 
 const DashboardLayout = () => {
+  const { user, loading } = useAuth();
+  const { role, roleLoading } = useUserRole();
+  if (!user || roleLoading) {
+    return <span className="loading loading-spinner text-primary"></span>;
+  }
+
+  console.log("user:", user);
+  console.log("role:", role); // should now show "user"
+  console.log("typeof role:", typeof role);
   return (
     <div className="flex flex-col">
       <Navbar></Navbar>
@@ -42,18 +54,36 @@ const DashboardLayout = () => {
           <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
             {/* Sidebar content here */}
             <ul className="menu w-full grow gap-3 p-5">
-              {/* List item */}
-              <li>
-                <NavLink
-                  to="/dashboard/view-users"
-                  className="is-drawer-close:tooltip is-drawer-close:tooltip-right active"
-                  data-tip="ViewUsers"
-                >
-                  {/* Settings icon */}
-                  <FaRegUser />
-                  <span className="is-drawer-close:hidden">View Users</span>
-                </NavLink>
-              </li>
+              {role === "user" && (
+                <>
+                  <li>
+                    <NavLink
+                      to="/dashboard/recent-activity"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Users"
+                    >
+                      <LuActivity />
+                      <span className="is-drawer-close:hidden">
+                        Recent Activity
+                      </span>
+                    </NavLink>
+                  </li>
+                </>
+              )}
+              {role === "admin" && (
+                <>
+                  <li>
+                    <NavLink
+                      to="/dashboard/view-users"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Users"
+                    >
+                      <FaRegUser />
+                      <span className="is-drawer-close:hidden">View Users</span>
+                    </NavLink>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
         </div>

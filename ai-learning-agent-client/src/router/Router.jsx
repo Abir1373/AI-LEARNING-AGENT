@@ -9,6 +9,9 @@ import Signup from "../pages/authentication/signup/Signup";
 import DashboardLayout from "../layouts/DashboardLayout";
 import Root from "../pages/dashboard/root/Root";
 import ViewUsers from "../pages/dashboard/view-users/ViewUsers";
+import RecentActivity from "../pages/dashboard/recent-activity/RecentActivity";
+import PrivateRoute from "../routes/PrivateRoute";
+import AdminRoute from "../routes/AdminRoute";
 
 const Router = createBrowserRouter([
   {
@@ -16,9 +19,24 @@ const Router = createBrowserRouter([
     Component: RootLayout,
     children: [
       { index: true, Component: Home },
-      { path: "about", Component: About },
-      { path: "contact", Component: ContactUs },
-      { path: "contact", Component: ContactUs },
+      {
+        path: "about",
+        element: (
+          <PrivateRoute>
+            {" "}
+            <About></About>{" "}
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "contact",
+        element: (
+          <PrivateRoute>
+            {" "}
+            <ContactUs></ContactUs>{" "}
+          </PrivateRoute>
+        ),
+      },
     ],
   },
   {
@@ -31,10 +49,29 @@ const Router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    Component: DashboardLayout,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
       { path: "root", Component: Root },
-      { path: "view-users", Component: ViewUsers },
+      {
+        path: "view-users",
+        element: (
+          <AdminRoute>
+            <ViewUsers />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "recent-activity",
+        element: (
+          <PrivateRoute>
+            <RecentActivity />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
 ]);

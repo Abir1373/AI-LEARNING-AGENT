@@ -50,7 +50,6 @@ async function run() {
       res.status(201).send(result);
     });
 
-    // Optional: Get user by email
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({ email });
