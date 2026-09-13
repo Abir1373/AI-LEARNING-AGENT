@@ -1,6 +1,7 @@
 import { FaMoon, FaSun } from "react-icons/fa";
 import useTheme from "../hooks/useTheme";
 import { Link } from "react-router";
+import Logo from "./Logo";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
@@ -44,12 +45,15 @@ const Navbar = () => {
             <li>
               <Link to="/dashboard">Dashboard</Link>
             </li>
+            <li>
+              <Link to="/login">Login</Link>
+            </li>
           </ul>
         </div>
 
-        <Link to="/" className="btn btn-ghost text-xl">
-          E-Biddaloy
-        </Link>
+        <div className="px-6 py-5 sm:px-10 lg:px-16">
+          <Logo />
+        </div>
       </div>
 
       <div className="navbar-center hidden lg:flex">
@@ -62,6 +66,9 @@ const Navbar = () => {
           </li>
           <li>
             <Link to="/dashboard">Dashboard</Link>
+          </li>
+          <li>
+            <Link to="/login">Login</Link>
           </li>
         </ul>
       </div>
