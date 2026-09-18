@@ -5,11 +5,16 @@ import Navbar from "../components/Navbar";
 import useAuth from "../hooks/useAuth";
 import useUserRole from "../hooks/useUserRole";
 import { LuActivity } from "react-icons/lu";
+import { MdQuiz } from "react-icons/md";
+import { FcStatistics } from "react-icons/fc";
+import { MdTopic } from "react-icons/md";
+import { BsFillSaveFill } from "react-icons/bs";
+import { MdAccountTree } from "react-icons/md";
 
 const DashboardLayout = () => {
   const { user, loading } = useAuth();
   const { role, roleLoading } = useUserRole();
-  if (!user || roleLoading) {
+  if (loading || roleLoading) {
     return <span className="loading loading-spinner text-primary"></span>;
   }
 
@@ -53,7 +58,7 @@ const DashboardLayout = () => {
           ></label>
           <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
             {/* Sidebar content here */}
-            <ul className="menu w-full grow gap-3 p-5">
+            <ul className="menu w-full grow gap-3 p-5 text-lg">
               {role === "user" && (
                 <>
                   <li>
@@ -65,6 +70,64 @@ const DashboardLayout = () => {
                       <LuActivity />
                       <span className="is-drawer-close:hidden">
                         Recent Activity
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/start-quiz"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Users"
+                    >
+                      <MdQuiz />
+                      <span className="is-drawer-close:hidden">Start Quiz</span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/learning-statistics"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Users"
+                    >
+                      <FcStatistics />
+                      <span className="is-drawer-close:hidden">
+                        Learning Statistics
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/favourite-topics"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Users"
+                    >
+                      <MdTopic />
+                      <span className="is-drawer-close:hidden">
+                        Favourite Topics
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/ai-content"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Users"
+                    >
+                      <BsFillSaveFill />
+                      <span className="is-drawer-close:hidden">
+                        Saved AI Generated Content
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/completed-quizes"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Users"
+                    >
+                      <MdAccountTree />
+                      <span className="is-drawer-close:hidden">
+                        Number of Quizes Completed
                       </span>
                     </NavLink>
                   </li>

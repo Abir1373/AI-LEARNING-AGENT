@@ -16,7 +16,7 @@ createRoot(document.getElementById("root")).render(
       <ThemeProvider>
         <AuthProvider>
           <UserRoleProvider>
-            <div className="max-w-7xl mx-auto m-3">
+            <div className="max-w-7xl mx-auto m-3 text-lg">
               <RouterProvider router={Router} />
             </div>
           </UserRoleProvider>

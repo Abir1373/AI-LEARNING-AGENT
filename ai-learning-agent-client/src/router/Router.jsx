@@ -12,6 +12,11 @@ import ViewUsers from "../pages/dashboard/view-users/ViewUsers";
 import RecentActivity from "../pages/dashboard/recent-activity/RecentActivity";
 import PrivateRoute from "../routes/PrivateRoute";
 import AdminRoute from "../routes/AdminRoute";
+import StartQuiz from "../pages/dashboard/start-quiz/StartQuiz";
+import LearningStatistics from "../pages/dashboard/learning-statistics/LearningStatistics";
+import FavouriteTopics from "../pages/dashboard/favourite-topics.jsx/FavouriteTopics";
+import AiContent from "../pages/dashboard/ai-content/AiContent";
+import CompletedQuizes from "../pages/dashboard/completed-quizes/CompletedQuizes";
 
 const Router = createBrowserRouter([
   {
@@ -69,6 +74,46 @@ const Router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <RecentActivity />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "start-quiz",
+        element: (
+          <PrivateRoute>
+            <StartQuiz />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "learning-statistics",
+        element: (
+          <PrivateRoute>
+            <LearningStatistics />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "favourite-topics",
+        element: (
+          <PrivateRoute>
+            <FavouriteTopics />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "ai-content",
+        element: (
+          <PrivateRoute>
+            <AiContent />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "completed-quizes",
+        element: (
+          <PrivateRoute>
+            <CompletedQuizes />
           </PrivateRoute>
         ),
       },
