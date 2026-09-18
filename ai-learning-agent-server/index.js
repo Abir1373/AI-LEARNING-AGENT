@@ -1,20 +1,29 @@
 require("node:dns").setServers(["8.8.8.8", "1.1.1.1"]);
+
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-// const bcrypt = require("bcrypt"); // Uncomment only if you need it later
+// 1. Import GoogleGenAI and Type helper from the official SDK
+const { GoogleGenAI, Type } = require("@google/genai");
 
 dotenv.config();
+
 const app = express();
 const port = process.env.PORT || 3000;
 
-// middleware
+// ====================== MIDDLEWARE ======================
+
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dmnxhxd.mongodb.net/?appName=Cluster0`;
+// ====================== GEMINI AI ======================
 
+// 2. Initialize the official client. It automatically picks up process.env.GEMINI_API_KEY
+const ai = new GoogleGenAI();
+
+// ====================== MONGODB ======================
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dmnxhxd.mongodb.net/?appName=Cluster0`;
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -24,51 +33,114 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
-  try {
-    await client.connect();
+  await client.connect();
 
-    const db = client.db("AI-Learner");
-    const userCollection = db.collection("Users");
+  const db = client.db("AI-Learner");
+  const userCollection = db.collection("Users");
 
-    // ====================== USERS API ======================
+  // ====================== USERS API ======================
 
-    // Create new user
-    app.post("/users", async (req, res) => {
-      const userInfo = req.body;
-
-      // Check if user already exists
-      const existingUser = await userCollection.findOne({
-        email: userInfo.email,
+  // Create new user
+  app.post("/users", async (req, res) => {
+    const userInfo = req.body;
+    const existingUser = await userCollection.findOne({
+      email: userInfo.email,
+    });
+    if (existingUser) {
+      return res.status(400).send({
+        message: "User already exists",
       });
+    }
+    const result = await userCollection.insertOne(userInfo);
+    res.status(201).send(result);
+  });
 
-      if (existingUser) {
-        return res.status(400).send({ message: "User already exists" });
-      }
+  // Get user
+  app.get("/users/:email", async (req, res) => {
+    const email = req.params.email;
+    const user = await userCollection.findOne({
+      email,
+    });
+    res.send(user);
+  });
 
-      // Insert new user
-      const result = await userCollection.insertOne(userInfo);
-      res.status(201).send(result);
+  // ====================== AI QUIZ API ======================
+
+  app.post("/generate-quiz", async (req, res) => {
+    const { topicName, query } = req.body;
+
+    // Validate request
+    if (!topicName || !query) {
+      return res.status(400).send({
+        message: "Topic name and query are required",
+      });
+    }
+    console.log("Generating quiz...");
+    console.log("Topic:", topicName);
+    console.log("Query:", query);
+
+    // 3. Request structured JSON using the updated gemini-3.6-flash model
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: `
+        You are an expert quiz generator.
+        Create a quiz based on:
+        Topic: ${topicName}
+        Query: ${query}
+        Generate exactly 10 multiple-choice questions.
+        Each question must have:
+        1. A clear question
+        2. Exactly 4 options
+        3. One correct answer
+        4. A short explanation
+      `,
+      config: {
+        // Enforce rigid schema constraint to guarantee structural compatibility
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            questions: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  question: { type: Type.STRING },
+                  options: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                  },
+                  correctAnswer: { type: Type.STRING },
+                  explanation: { type: Type.STRING },
+                },
+                required: [
+                  "question",
+                  "options",
+                  "correctAnswer",
+                  "explanation",
+                ],
+              },
+            },
+          },
+          required: ["questions"],
+        },
+      },
     });
 
-    app.get("/users/:email", async (req, res) => {
-      const email = req.params.email;
-      const user = await userCollection.findOne({ email });
-      res.send(user);
-    });
-
-    console.log("✅ Successfully connected to MongoDB!");
-  } finally {
-    // await client.close();
-  }
+    // 4. Extract text payload and parse it back to the client app
+    const quizText = response.text;
+    const quiz = JSON.parse(quizText);
+    res.status(200).send(quiz);
+  });
+  console.log("✅ Successfully connected to MongoDB!");
 }
+run();
 
-run().catch(console.dir);
-
-// Test route
+// ====================== TEST ROUTE ======================
 app.get("/", (req, res) => {
   res.send("AI Learning Agent Server is running");
 });
-
+// ====================== START SERVER ======================
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
