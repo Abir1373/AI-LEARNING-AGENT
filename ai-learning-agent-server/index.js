@@ -4,7 +4,7 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-// 1. Import GoogleGenAI and Type helper from the official SDK
+const { ObjectId } = require("mongodb");
 const { GoogleGenAI, Type } = require("@google/genai");
 
 dotenv.config();
@@ -37,6 +37,7 @@ async function run() {
 
   const db = client.db("AI-Learner");
   const userCollection = db.collection("Users");
+  const searchInfoCollection = db.collection("Search Infos");
 
   // ====================== USERS API ======================
 
@@ -66,6 +67,51 @@ async function run() {
 
   // ====================== AI QUIZ API ======================
 
+  app.post("/search-data", async (req, res) => {
+    const { searchData, email, userAnswers, userScore, topicName, query } =
+      req.body;
+
+    const result = await searchInfoCollection.insertOne({
+      searchData,
+      email,
+      userAnswers,
+      userScore,
+      topicName,
+      query,
+      favouriteTopic: false,
+      createdAt: new Date(),
+    });
+
+    res.send({ success: true, insertedId: result.insertedId });
+  });
+
+  app.get("/search-data", async (req, res) => {
+    const { email } = req.query;
+    console.log("Email received:", email);
+
+    const result = await searchInfoCollection
+      .find({ email: email })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    console.log("Found documents:", result.length);
+    res.send(result);
+  });
+
+  app.patch("/mark-favourite", async (req, res) => {
+    const { id, favouriteTopic } = req.body;
+    const result = await searchInfoCollection.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          favouriteTopic: favouriteTopic,
+        },
+      },
+    );
+
+    res.send(result);
+  });
+
   app.post("/generate-quiz", async (req, res) => {
     const { topicName, query } = req.body;
 
@@ -81,10 +127,10 @@ async function run() {
 
     // 3. Request structured JSON using the updated gemini-3.6-flash model
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-flash-lite",
       contents: `
-        You are an expert quiz generator.
-        Create a quiz based on:
+      You are an expert quiz generator.
+      Create a quiz based on:
         Topic: ${topicName}
         Query: ${query}
         Generate exactly 10 multiple-choice questions.
@@ -135,6 +181,8 @@ async function run() {
   console.log("✅ Successfully connected to MongoDB!");
 }
 run();
+
+// post search data
 
 // ====================== TEST ROUTE ======================
 app.get("/", (req, res) => {

@@ -65,7 +65,7 @@ const DashboardLayout = () => {
                     <NavLink
                       to="/dashboard/recent-activity"
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                      data-tip="View Users"
+                      data-tip="Recent Activity"
                     >
                       <LuActivity />
                       <span className="is-drawer-close:hidden">
@@ -77,7 +77,7 @@ const DashboardLayout = () => {
                     <NavLink
                       to="/dashboard/start-quiz"
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                      data-tip="View Users"
+                      data-tip="Start Quiz"
                     >
                       <MdQuiz />
                       <span className="is-drawer-close:hidden">Start Quiz</span>
@@ -87,7 +87,7 @@ const DashboardLayout = () => {
                     <NavLink
                       to="/dashboard/learning-statistics"
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                      data-tip="View Users"
+                      data-tip="Learning Statistics"
                     >
                       <FcStatistics />
                       <span className="is-drawer-close:hidden">
@@ -99,7 +99,7 @@ const DashboardLayout = () => {
                     <NavLink
                       to="/dashboard/favourite-topics"
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                      data-tip="View Users"
+                      data-tip="Favourite Topics"
                     >
                       <MdTopic />
                       <span className="is-drawer-close:hidden">
@@ -111,7 +111,7 @@ const DashboardLayout = () => {
                     <NavLink
                       to="/dashboard/ai-content"
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                      data-tip="View Users"
+                      data-tip="AI Content"
                     >
                       <BsFillSaveFill />
                       <span className="is-drawer-close:hidden">
@@ -123,7 +123,7 @@ const DashboardLayout = () => {
                     <NavLink
                       to="/dashboard/completed-quizes"
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                      data-tip="View Users"
+                      data-tip="Completed Quizes"
                     >
                       <MdAccountTree />
                       <span className="is-drawer-close:hidden">
