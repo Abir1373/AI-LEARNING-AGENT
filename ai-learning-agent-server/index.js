@@ -98,6 +98,14 @@ async function run() {
     res.send(result);
   });
 
+  app.delete("/search-data/:id", async (req, res) => {
+    const { id } = req.params;
+    const result = await searchInfoCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+    res.send(result);
+  });
+
   app.patch("/mark-favourite", async (req, res) => {
     const { id, favouriteTopic } = req.body;
     const result = await searchInfoCollection.updateOne(

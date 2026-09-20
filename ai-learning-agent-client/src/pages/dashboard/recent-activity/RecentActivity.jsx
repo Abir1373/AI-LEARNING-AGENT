@@ -33,6 +33,12 @@ const RecentActivity = () => {
     refetch();
   };
 
+  const handleDelete = async (id) => {
+    const res = await axiosInstance.delete(`/search-data/${id}`);
+    console.log(res.data);
+    refetch();
+  };
+
   if (loading || infoLoading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -93,7 +99,10 @@ const RecentActivity = () => {
                     {item.favouriteTopic ? <FaHeart /> : <FaRegHeart />}
                   </button>
 
-                  <button className="btn btn-ghost text-2xl text-rose-900">
+                  <button
+                    onClick={() => handleDelete(item._id)}
+                    className="btn btn-ghost text-2xl text-rose-900"
+                  >
                     <MdDelete />
                   </button>
                 </div>

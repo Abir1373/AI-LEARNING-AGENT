@@ -67,7 +67,7 @@ const DashboardLayout = () => {
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                       data-tip="Recent Activity"
                     >
-                      <LuActivity />
+                      <LuActivity className="text-lg" />
                       <span className="is-drawer-close:hidden">
                         Recent Activity
                       </span>
@@ -79,7 +79,7 @@ const DashboardLayout = () => {
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                       data-tip="Start Quiz"
                     >
-                      <MdQuiz />
+                      <MdQuiz className="text-lg" />
                       <span className="is-drawer-close:hidden">Start Quiz</span>
                     </NavLink>
                   </li>
@@ -89,7 +89,7 @@ const DashboardLayout = () => {
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                       data-tip="Learning Statistics"
                     >
-                      <FcStatistics />
+                      <FcStatistics className="text-lg" />
                       <span className="is-drawer-close:hidden">
                         Learning Statistics
                       </span>
@@ -101,7 +101,7 @@ const DashboardLayout = () => {
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                       data-tip="Favourite Topics"
                     >
-                      <MdTopic />
+                      <MdTopic className="text-lg" />
                       <span className="is-drawer-close:hidden">
                         Favourite Topics
                       </span>
@@ -113,7 +113,7 @@ const DashboardLayout = () => {
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                       data-tip="AI Content"
                     >
-                      <BsFillSaveFill />
+                      <BsFillSaveFill className="text-sm" />
                       <span className="is-drawer-close:hidden">
                         Saved AI Generated Content
                       </span>
@@ -125,7 +125,7 @@ const DashboardLayout = () => {
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                       data-tip="Completed Quizes"
                     >
-                      <MdAccountTree />
+                      <MdAccountTree className="text-sm" />
                       <span className="is-drawer-close:hidden">
                         Number of Quizes Completed
                       </span>
