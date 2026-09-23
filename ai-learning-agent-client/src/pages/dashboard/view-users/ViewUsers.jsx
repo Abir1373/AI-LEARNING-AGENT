@@ -4,7 +4,11 @@ import useAxios from "../../../hooks/useAxios";
 const ViewUsers = () => {
   const axiosInstance = useAxios();
 
-  const { data: users = [], isLoading } = useQuery({
+  const {
+    data: users = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const res = await axiosInstance.get("/users");
@@ -24,13 +28,24 @@ const ViewUsers = () => {
     return <div className="text-center py-20 text-gray-500">No Users Yet</div>;
   }
 
+  const handleRoleChange = async (e, id) => {
+    e.preventDefault();
+    const newRole = e.target.value;
+    const res = await axiosInstance.patch(`/users/role/${id}`, {
+      role: newRole,
+    });
+    console.log(res.data);
+    refetch();
+  };
+
   return (
     <div className="overflow-x-auto m-6">
       <table className="table">
         {/* head */}
-        <thead className="text-base">
+        <thead className="text-base text-center uppercase">
           <tr>
             <th>#</th>
+            <th>Image</th>
             <th>User</th>
             <th>Email</th>
             <th>Role</th>
@@ -40,37 +55,44 @@ const ViewUsers = () => {
 
         <tbody>
           {users.map((user, index) => (
-            <tr key={user._id || index}>
+            <tr key={user._id || index} className="text-center">
+              {/* # */}
               <th>{index + 1}</th>
 
-              {/* User Name + Photo */}
+              {/* Image */}
               <td>
-                <div className="flex items-center gap-3">
-                  <div className="avatar">
-                    <div className="mask mask-squircle h-12 w-12">
-                      <img
-                        src={
-                          user.image ||
-                          "https://img.daisyui.com/images/profile/demo/2@94.webp"
-                        }
-                        alt="User"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="font-bold">{user.name || "No Name"}</div>
+                <div className="avatar">
+                  <div className="mask mask-squircle h-12 w-12">
+                    <img
+                      src={
+                        user.image ||
+                        "https://img.daisyui.com/images/profile/demo/2@94.webp"
+                      }
+                      alt="User"
+                    />
                   </div>
                 </div>
+              </td>
+
+              {/* User Name */}
+              <td>
+                <div className="font-bold">{user.name || "No Name"}</div>
               </td>
 
               {/* Email */}
               <td>{user.email || "No Email"}</td>
 
               {/* Role */}
+              {/* Role */}
               <td>
-                <span className="badge badge-ghost badge-sm">
-                  {user.role || "user"}
-                </span>
+                <select
+                  className="select select-bordered select-sm w-full max-w-[140px]"
+                  defaultValue={user.role || "user"}
+                  onChange={(e) => handleRoleChange(e, user._id)}
+                >
+                  <option value="user">USER</option>
+                  <option value="pending">PENDING</option>
+                </select>
               </td>
 
               {/* Action */}

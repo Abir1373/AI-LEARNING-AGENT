@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router";
+import { Outlet, NavLink, Navigate } from "react-router";
 import { FaRegUser } from "react-icons/fa";
 import { TbLayoutSidebarRightExpandFilled } from "react-icons/tb";
 import Navbar from "../components/Navbar";
@@ -16,53 +16,63 @@ import { TbArrowAutofitContentFilled } from "react-icons/tb";
 import { SiStatista } from "react-icons/si";
 
 const DashboardLayout = () => {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   const { role, roleLoading } = useUserRole();
+
+  // Show loading while checking auth & role
   if (loading || roleLoading) {
-    return <span className="loading loading-spinner text-primary"></span>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
   }
 
-  // console.log("user:", user);
-  // console.log("role:", role); // should now show "user"
-  // console.log("typeof role:", typeof role);
+  // Redirect pending users
+  if (role === "pending") {
+    return <Navigate to="/pending" replace />;
+  }
+
   return (
     <div className="flex flex-col">
-      <Navbar></Navbar>
+      <Navbar />
+
       <div className="drawer lg:drawer-open">
         <input
           id="my-drawer-4"
           type="checkbox"
           className="drawer-toggle inline"
         />
+
+        {/* Page Content */}
         <div className="drawer-content">
-          {/* Navbar */}
           <nav className="navbar w-full bg-base-300">
             <label
               htmlFor="my-drawer-4"
               aria-label="open sidebar"
               className="btn btn-square btn-ghost drawer-button"
             >
-              {/* Sidebar toggle icon */}
               <TbLayoutSidebarRightExpandFilled className="text-xl" />
             </label>
-            <div className="px-4">Dashboard </div>
+            <div className="px-4">Dashboard</div>
           </nav>
-          {/* Page content here */}
+
           <div className="p-4">
-            {" "}
-            <Outlet></Outlet>{" "}
+            <Outlet />
           </div>
         </div>
 
+        {/* Sidebar */}
         <div className="drawer-side is-drawer-close:overflow-visible">
           <label
             htmlFor="my-drawer-4"
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <div className="flex min-h-full  flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
-            {/* Sidebar content here */}
+
+          <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
             <ul className="menu w-full grow gap-3 p-5 text-lg">
+              {/* ================= USER MENU ================= */}
               {role === "user" && (
                 <>
                   <li>
@@ -77,6 +87,7 @@ const DashboardLayout = () => {
                       </span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/start-quiz"
@@ -87,6 +98,7 @@ const DashboardLayout = () => {
                       <span className="is-drawer-close:hidden">Start Quiz</span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/learning-statistics"
@@ -99,6 +111,7 @@ const DashboardLayout = () => {
                       </span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/favourite-topics"
@@ -111,6 +124,7 @@ const DashboardLayout = () => {
                       </span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/ai-content"
@@ -123,6 +137,7 @@ const DashboardLayout = () => {
                       </span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/completed-quizes"
@@ -137,6 +152,8 @@ const DashboardLayout = () => {
                   </li>
                 </>
               )}
+
+              {/* ================= ADMIN MENU ================= */}
               {role === "admin" && (
                 <>
                   <li>
@@ -149,6 +166,7 @@ const DashboardLayout = () => {
                       <span className="is-drawer-close:hidden">View Users</span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/search-users"
@@ -156,11 +174,12 @@ const DashboardLayout = () => {
                       data-tip="Search Users"
                     >
                       <MdPersonSearch className="text-lg" />
-                      <span className="is-drawer-close:hidden ">
+                      <span className="is-drawer-close:hidden">
                         Search Users
                       </span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/view-user-activity"
@@ -173,6 +192,7 @@ const DashboardLayout = () => {
                       </span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/view-generated-content"
@@ -185,6 +205,7 @@ const DashboardLayout = () => {
                       </span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/view-quiz-statistics"

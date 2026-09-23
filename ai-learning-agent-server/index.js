@@ -65,8 +65,22 @@ async function run() {
     res.send(user);
   });
 
+  //get all users
   app.get("/users", async (req, res) => {
     const result = await userCollection.find().toArray();
+    res.send(result);
+  });
+
+  // Update user role
+  app.patch("/users/role/:id", async (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    const result = await userCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { role: role } },
+    );
+
     res.send(result);
   });
 

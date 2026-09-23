@@ -21,6 +21,7 @@ import SearchUsers from "../pages/dashboard/search-users/SearchUsers";
 import ViewUserActivity from "../pages/dashboard/view-user-activity/ViewUserActivity";
 import ViewGeneratedContent from "../pages/dashboard/view-generated-content/ViewGeneratedContent";
 import ViewQuizStatistics from "../pages/dashboard/view-quiz-statistics/ViewQuizStatistics";
+import PendingPage from "../pages/error-pages/PendingPage";
 
 const Router = createBrowserRouter([
   {
@@ -43,6 +44,14 @@ const Router = createBrowserRouter([
           <PrivateRoute>
             {" "}
             <ContactUs></ContactUs>{" "}
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "pending",
+        element: (
+          <PrivateRoute>
+            <PendingPage></PendingPage>
           </PrivateRoute>
         ),
       },
