@@ -17,6 +17,10 @@ import LearningStatistics from "../pages/dashboard/learning-statistics/LearningS
 import FavouriteTopics from "../pages/dashboard/favourite-topics.jsx/FavouriteTopics";
 import AiContent from "../pages/dashboard/ai-content/AiContent";
 import CompletedQuizes from "../pages/dashboard/completed-quizes/CompletedQuizes";
+import SearchUsers from "../pages/dashboard/search-users/SearchUsers";
+import ViewUserActivity from "../pages/dashboard/view-user-activity/ViewUserActivity";
+import ViewGeneratedContent from "../pages/dashboard/view-generated-content/ViewGeneratedContent";
+import ViewQuizStatistics from "../pages/dashboard/view-quiz-statistics/ViewQuizStatistics";
 
 const Router = createBrowserRouter([
   {
@@ -66,6 +70,38 @@ const Router = createBrowserRouter([
         element: (
           <AdminRoute>
             <ViewUsers />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "search-users",
+        element: (
+          <AdminRoute>
+            <SearchUsers />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "view-user-activity",
+        element: (
+          <AdminRoute>
+            <ViewUserActivity />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "view-generated-content",
+        element: (
+          <AdminRoute>
+            <ViewGeneratedContent />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "view-quiz-statistics",
+        element: (
+          <AdminRoute>
+            <ViewQuizStatistics />
           </AdminRoute>
         ),
       },

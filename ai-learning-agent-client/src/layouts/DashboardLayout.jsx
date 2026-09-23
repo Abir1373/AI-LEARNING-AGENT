@@ -10,6 +10,10 @@ import { FcStatistics } from "react-icons/fc";
 import { MdTopic } from "react-icons/md";
 import { BsFillSaveFill } from "react-icons/bs";
 import { MdAccountTree } from "react-icons/md";
+import { MdPersonSearch } from "react-icons/md";
+import { SiPaloaltonetworks } from "react-icons/si";
+import { TbArrowAutofitContentFilled } from "react-icons/tb";
+import { SiStatista } from "react-icons/si";
 
 const DashboardLayout = () => {
   const { user, loading } = useAuth();
@@ -18,9 +22,9 @@ const DashboardLayout = () => {
     return <span className="loading loading-spinner text-primary"></span>;
   }
 
-  console.log("user:", user);
-  console.log("role:", role); // should now show "user"
-  console.log("typeof role:", typeof role);
+  // console.log("user:", user);
+  // console.log("role:", role); // should now show "user"
+  // console.log("typeof role:", typeof role);
   return (
     <div className="flex flex-col">
       <Navbar></Navbar>
@@ -56,7 +60,7 @@ const DashboardLayout = () => {
             aria-label="close sidebar"
             className="drawer-overlay"
           ></label>
-          <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
+          <div className="flex min-h-full  flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
             {/* Sidebar content here */}
             <ul className="menu w-full grow gap-3 p-5 text-lg">
               {role === "user" && (
@@ -141,8 +145,56 @@ const DashboardLayout = () => {
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                       data-tip="View Users"
                     >
-                      <FaRegUser />
+                      <FaRegUser className="text-sm" />
                       <span className="is-drawer-close:hidden">View Users</span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/search-users"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="Search Users"
+                    >
+                      <MdPersonSearch className="text-lg" />
+                      <span className="is-drawer-close:hidden ">
+                        Search Users
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/view-user-activity"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View User Activity"
+                    >
+                      <SiPaloaltonetworks className="text-lg" />
+                      <span className="is-drawer-close:hidden">
+                        View User Activity
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/view-generated-content"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Generated Content"
+                    >
+                      <TbArrowAutofitContentFilled className="text-lg" />
+                      <span className="is-drawer-close:hidden">
+                        View Generated Content
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/view-quiz-statistics"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="View Quiz Statistics"
+                    >
+                      <SiStatista className="text-sm" />
+                      <span className="is-drawer-close:hidden">
+                        View Quiz Statistics
+                      </span>
                     </NavLink>
                   </li>
                 </>
