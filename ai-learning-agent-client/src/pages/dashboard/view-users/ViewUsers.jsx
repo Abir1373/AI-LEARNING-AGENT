@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxios from "../../../hooks/useAxios";
+import { RiDeleteBin4Fill } from "react-icons/ri";
 
 const ViewUsers = () => {
   const axiosInstance = useAxios();
@@ -36,6 +37,10 @@ const ViewUsers = () => {
     });
     console.log(res.data);
     refetch();
+  };
+
+  const handleDelete = (id) => {
+    console.log(id);
   };
 
   return (
@@ -86,18 +91,24 @@ const ViewUsers = () => {
               {/* Role */}
               <td>
                 <select
-                  className="select select-bordered select-sm w-full max-w-[140px]"
-                  defaultValue={user.role || "user"}
+                  className="select select-bordered select-sm w-full max-w-[140px] uppercase"
+                  value={user.role || "user"} // ← Use value, not defaultValue
                   onChange={(e) => handleRoleChange(e, user._id)}
                 >
-                  <option value="user">USER</option>
-                  <option value="pending">PENDING</option>
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                  <option value="pending">Pending</option>
                 </select>
               </td>
 
               {/* Action */}
               <td>
-                <button className="btn btn-ghost btn-xs">Details</button>
+                <button
+                  onClick={() => handleDelete(user._id)}
+                  className="btn btn-ghost btn-xs"
+                >
+                  <RiDeleteBin4Fill className="text-xl text-rose-700" />
+                </button>
               </td>
             </tr>
           ))}
