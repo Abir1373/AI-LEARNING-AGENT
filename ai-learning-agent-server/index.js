@@ -65,6 +65,11 @@ async function run() {
     res.send(user);
   });
 
+  app.get("/users", async (req, res) => {
+    const result = await userCollection.find().toArray();
+    res.send(result);
+  });
+
   // ====================== AI QUIZ API ======================
 
   app.post("/search-data", async (req, res) => {
