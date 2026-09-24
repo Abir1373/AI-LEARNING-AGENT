@@ -5,12 +5,11 @@ import Navbar from "../components/Navbar";
 import useAuth from "../hooks/useAuth";
 import useUserRole from "../hooks/useUserRole";
 import { LuActivity } from "react-icons/lu";
-import { MdQuiz } from "react-icons/md";
+import { MdContacts, MdQuiz } from "react-icons/md";
 import { FcStatistics } from "react-icons/fc";
 import { MdTopic } from "react-icons/md";
 import { BsFillSaveFill } from "react-icons/bs";
 import { MdAccountTree } from "react-icons/md";
-import { MdPersonSearch } from "react-icons/md";
 import { SiPaloaltonetworks } from "react-icons/si";
 import { TbArrowAutofitContentFilled } from "react-icons/tb";
 import { SiStatista } from "react-icons/si";
@@ -71,7 +70,7 @@ const DashboardLayout = () => {
           ></label>
 
           <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
-            <ul className="menu w-full grow gap-3 p-5 text-lg">
+            <ul className="menu w-full grow gap-3 mr-5 text-lg">
               {/* ================= USER MENU ================= */}
               {role === "user" && (
                 <>
@@ -169,19 +168,6 @@ const DashboardLayout = () => {
 
                   <li>
                     <NavLink
-                      to="/dashboard/search-users"
-                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                      data-tip="Search Users"
-                    >
-                      <MdPersonSearch className="text-lg" />
-                      <span className="is-drawer-close:hidden">
-                        Search Users
-                      </span>
-                    </NavLink>
-                  </li>
-
-                  <li>
-                    <NavLink
                       to="/dashboard/view-user-activity"
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                       data-tip="View User Activity"
@@ -215,6 +201,18 @@ const DashboardLayout = () => {
                       <SiStatista className="text-sm" />
                       <span className="is-drawer-close:hidden">
                         View Quiz Statistics
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/dashboard/contact-requests"
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip=" Contact Requests"
+                    >
+                      <MdContacts className="text-lg" />
+                      <span className="is-drawer-close:hidden">
+                        Contact Requests
                       </span>
                     </NavLink>
                   </li>

@@ -38,6 +38,7 @@ async function run() {
   const db = client.db("AI-Learner");
   const userCollection = db.collection("Users");
   const searchInfoCollection = db.collection("Search Infos");
+  const contactCollection = db.collection("Contact");
 
   // ====================== USERS API ======================
 
@@ -117,6 +118,14 @@ async function run() {
     res.send(result);
   });
 
+  app.get("/search-data/all", async (req, res) => {
+    const result = await searchInfoCollection
+      .find()
+      .sort({ createdAt: -1 })
+      .toArray();
+    res.send(result);
+  });
+
   app.delete("/search-data/:id", async (req, res) => {
     const { id } = req.params;
     const result = await searchInfoCollection.deleteOne({
@@ -136,6 +145,33 @@ async function run() {
       },
     );
 
+    res.send(result);
+  });
+
+  // contact starts here
+
+  app.post("/contact", async (req, res) => {
+    const contactData = {
+      ...req.body,
+      createdAt: new Date(),
+    };
+    const result = await contactCollection.insertOne(contactData);
+    res.send(result);
+  });
+
+  app.get("/contact", async (req, res) => {
+    const result = await contactCollection
+      .find()
+      .sort({ createdAt: -1 })
+      .toArray();
+    res.send(result);
+  });
+
+  app.delete("/contact/:id", async (req, res) => {
+    const { id } = req.params;
+    const result = await contactCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
     res.send(result);
   });
 
