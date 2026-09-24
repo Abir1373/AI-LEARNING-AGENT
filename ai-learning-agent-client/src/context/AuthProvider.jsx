@@ -11,64 +11,68 @@ import {
   updatePassword,
   updateProfile,
 } from "firebase/auth";
+import axios from "axios"; // or use your axiosInstance
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Create new user
   const createUser = (email, password) => {
     setLoading(true);
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
-  // Sign in existing user
   const signIn = (email, password) => {
     setLoading(true);
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  // Update user profile (name, photo, etc.)
   const updateUserProfile = (profileInfo) => {
-    setLoading(true);
     return updateProfile(auth.currentUser, profileInfo);
   };
 
-  // update user passwrod
   const updateUserPassword = (newPassword) => {
-    setLoading(true);
     return updatePassword(auth.currentUser, newPassword);
   };
 
-  // inside AuthProvider
   const updateUserEmail = (newEmail) => {
-    setLoading(true);
     return updateEmail(auth.currentUser, newEmail);
   };
 
-  // Logout
   const logOut = () => {
+    localStorage.removeItem("access-token"); // clear token on logout
     setLoading(true);
     return signOut(auth);
   };
 
-  //delete user
   const deleteUserInfo = () => {
-    setLoading(true);
     return deleteUser(auth.currentUser);
   };
 
-  // Observe auth state
+  // Observe auth state + generate JWT
   useEffect(() => {
-    const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unSubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      console.log("user status changed ", currentUser);
+
+      if (currentUser?.email) {
+        // User is logged in → get JWT from backend
+        try {
+          const res = await axios.post("http://localhost:3000/jwt", {
+            email: currentUser.email,
+          });
+          localStorage.setItem("access-token", res.data.token);
+        } catch (error) {
+          console.error("JWT Error:", error);
+        }
+      } else {
+        // User logged out → remove token
+        localStorage.removeItem("access-token");
+      }
+
       setLoading(false);
     });
 
-    return () => {
-      unSubscribe();
-    };
+    return () => unSubscribe();
   }, []);
 
   const authInfo = {
