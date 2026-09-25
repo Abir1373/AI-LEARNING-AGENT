@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Navigate } from "react-router";
+import { Outlet, NavLink, Navigate, useLocation } from "react-router";
 import { FaRegUser } from "react-icons/fa";
 import { TbLayoutSidebarRightExpandFilled } from "react-icons/tb";
 import Navbar from "../components/Navbar";
@@ -17,6 +17,7 @@ import { SiStatista } from "react-icons/si";
 const DashboardLayout = () => {
   const { loading } = useAuth();
   const { role, roleLoading } = useUserRole();
+  const location = useLocation();
 
   // Show loading while checking auth & role
   if (loading || roleLoading) {
@@ -30,6 +31,16 @@ const DashboardLayout = () => {
   // Redirect pending users
   if (role === "pending") {
     return <Navigate to="/pending" replace />;
+  }
+
+  // Only redirect when user is on the base /dashboard path
+  if (location.pathname === "/dashboard") {
+    if (role === "admin") {
+      return <Navigate to="/dashboard/view-users" replace />;
+    }
+    if (role === "user") {
+      return <Navigate to="/dashboard/recent-activity" replace />;
+    }
   }
 
   return (
@@ -204,11 +215,12 @@ const DashboardLayout = () => {
                       </span>
                     </NavLink>
                   </li>
+
                   <li>
                     <NavLink
                       to="/dashboard/contact-requests"
                       className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                      data-tip=" Contact Requests"
+                      data-tip="Contact Requests"
                     >
                       <MdContacts className="text-lg" />
                       <span className="is-drawer-close:hidden">

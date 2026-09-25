@@ -29,7 +29,7 @@ const Signup = () => {
         //update userInfo in the database
         const userInfo = {
           email: data.email,
-          role: "user",
+          role: "pending",
           dob: data.dob,
           image: data.image,
           name: data.name,
@@ -53,7 +53,7 @@ const Signup = () => {
               icon: "success",
               draggable: true,
             });
-            navigate("/login");
+            navigate("/pending");
           })
           .catch((error) => {
             console.log(error);

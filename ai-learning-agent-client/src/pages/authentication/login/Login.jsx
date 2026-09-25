@@ -6,7 +6,7 @@ import useAuth from "../../../hooks/useAuth";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn } = useAuth();
+  const { user, loading, signIn } = useAuth();
   const {
     register,
     handleSubmit,
@@ -15,6 +15,18 @@ const Login = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const from = location.state?.from || "/";
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (user) {
+    navigate(from);
+  }
 
   const onSubmit = async (data) => {
     await signIn(data.email, data.password);

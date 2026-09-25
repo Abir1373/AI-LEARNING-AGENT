@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const { GoogleGenAI, Type } = require("@google/genai");
 
 dotenv.config();
@@ -12,7 +13,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-//middleware
+// middleware
 app.use(cors());
 app.use(express.json());
 
@@ -38,9 +39,8 @@ async function run() {
     const searchInfoCollection = db.collection("Search Infos");
     const contactCollection = db.collection("Contact");
 
-    //jwt middlewares
+    // ====================== JWT MIDDLEWARES ======================
 
-    // Verify Token
     const verifyToken = (req, res, next) => {
       const authHeader = req.headers.authorization;
 
@@ -59,7 +59,6 @@ async function run() {
       });
     };
 
-    // Verify Admin
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
       const user = await userCollection.findOne({ email });
@@ -70,11 +69,11 @@ async function run() {
       next();
     };
 
-    // Auth API
+    // ====================== AUTH API ======================
 
     // Create JWT Token
     app.post("/jwt", async (req, res) => {
-      const user = req.body; // { email: "..." }
+      const user = req.body;
 
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "7d",
@@ -83,11 +82,12 @@ async function run() {
       res.send({ token });
     });
 
-    // Users API
+    // ====================== USERS API ======================
 
-    // Create new user
+    // Create new user (with bcrypt password hashing)
     app.post("/users", async (req, res) => {
       const userInfo = req.body;
+
       const existingUser = await userCollection.findOne({
         email: userInfo.email,
       });
@@ -96,15 +96,63 @@ async function run() {
         return res.status(400).send({ message: "User already exists" });
       }
 
+      // Hash password if provided
+      if (userInfo.password) {
+        const salt = await bcrypt.genSalt(10);
+        userInfo.password = await bcrypt.hash(userInfo.password, salt);
+      }
+
+      // Default role
+      if (!userInfo.role) {
+        userInfo.role = "user";
+      }
+
       const result = await userCollection.insertOne(userInfo);
       res.status(201).send(result);
+    });
+
+    // Login with email + password (bcrypt compare)
+    app.post("/login", async (req, res) => {
+      const { email, password } = req.body;
+
+      const user = await userCollection.findOne({ email });
+
+      if (!user) {
+        return res.status(401).send({ message: "User not found" });
+      }
+
+      if (!user.password) {
+        return res
+          .status(401)
+          .send({ message: "Password not set for this user" });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return res.status(401).send({ message: "Invalid password" });
+      }
+
+      // Create JWT
+      const token = jwt.sign(
+        { email: user.email },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "7d" },
+      );
+
+      // Don't send password to frontend
+      const { password: pwd, ...userWithoutPassword } = user;
+
+      res.send({
+        token,
+        user: userWithoutPassword,
+      });
     });
 
     // Get single user
     app.get("/users/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
 
-      // Security: user can only access their own data (unless admin)
       if (req.decoded.email !== email) {
         const user = await userCollection.findOne({ email: req.decoded.email });
         if (user?.role !== "admin") {
@@ -113,13 +161,20 @@ async function run() {
       }
 
       const user = await userCollection.findOne({ email });
+      // Remove password before sending
+      if (user?.password) {
+        delete user.password;
+      }
       res.send(user);
     });
 
     // Get all users (Admin only)
     app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
-      res.send(result);
+
+      // Remove passwords
+      const safeUsers = result.map(({ password, ...user }) => user);
+      res.send(safeUsers);
     });
 
     // Update user role (Admin only)
@@ -135,14 +190,12 @@ async function run() {
       res.send(result);
     });
 
-    // AI Quiz API
+    // ====================== AI QUIZ API ======================
 
-    // Save quiz result (Logged in user)
     app.post("/search-data", verifyToken, async (req, res) => {
       const { searchData, email, userAnswers, userScore, topicName, query } =
         req.body;
 
-      // Security check
       if (req.decoded.email !== email) {
         return res.status(403).send({ message: "Forbidden access" });
       }
@@ -161,7 +214,6 @@ async function run() {
       res.send({ success: true, insertedId: result.insertedId });
     });
 
-    // Get user's own quiz data
     app.get("/search-data", verifyToken, async (req, res) => {
       const { email } = req.query;
 
@@ -177,7 +229,6 @@ async function run() {
       res.send(result);
     });
 
-    // Get ALL quiz data (Admin only)
     app.get("/search-data/all", verifyToken, verifyAdmin, async (req, res) => {
       const result = await searchInfoCollection
         .find()
@@ -186,7 +237,6 @@ async function run() {
       res.send(result);
     });
 
-    // Delete quiz data (Admin only)
     app.delete(
       "/search-data/:id",
       verifyToken,
@@ -200,7 +250,6 @@ async function run() {
       },
     );
 
-    // Mark favourite (Logged in user)
     app.patch("/mark-favourite", verifyToken, async (req, res) => {
       const { id, favouriteTopic } = req.body;
 
@@ -212,9 +261,8 @@ async function run() {
       res.send(result);
     });
 
-    // Contact API
+    // ====================== CONTACT API ======================
 
-    // Submit contact (Public)
     app.post("/contact", async (req, res) => {
       const contactData = {
         ...req.body,
@@ -224,7 +272,6 @@ async function run() {
       res.send({ success: true, insertedId: result.insertedId });
     });
 
-    // Get all contacts (Admin only)
     app.get("/contact", verifyToken, verifyAdmin, async (req, res) => {
       const result = await contactCollection
         .find()
@@ -233,7 +280,6 @@ async function run() {
       res.send(result);
     });
 
-    // Delete contact (Admin only)
     app.delete("/contact/:id", verifyToken, verifyAdmin, async (req, res) => {
       const { id } = req.params;
       const result = await contactCollection.deleteOne({
@@ -242,7 +288,7 @@ async function run() {
       res.send(result);
     });
 
-    // Generate AI Quiz
+    // ====================== GENERATE QUIZ ======================
 
     app.post("/generate-quiz", verifyToken, async (req, res) => {
       const { topicName, query } = req.body;
@@ -252,10 +298,6 @@ async function run() {
           message: "Topic name and query are required",
         });
       }
-
-      // console.log("Generating quiz...");
-      // console.log("Topic:", topicName);
-      // console.log("Query:", query);
 
       const response = await ai.models.generateContent({
         model: "gemini-3.1-flash-lite",
@@ -310,7 +352,7 @@ async function run() {
 
     console.log("✅ Successfully connected to MongoDB!");
   } finally {
-    // await client.close(); // keep connection open
+    // keep connection open
   }
 }
 
