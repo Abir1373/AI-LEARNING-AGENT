@@ -7,6 +7,8 @@ const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { GoogleGenAI, Type } = require("@google/genai");
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
 
 dotenv.config();
 
@@ -19,6 +21,16 @@ app.use(express.json());
 
 // gemini
 const ai = new GoogleGenAI();
+
+// ====================== FIREBASE ADMIN ======================
+const serviceAccount = require("./firebase-admin-key.json");
+
+initializeApp({
+  credential: cert(serviceAccount),
+});
+
+// Use this instead of admin.auth()
+const auth = getAuth();
 
 // mongodb
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dmnxhxd.mongodb.net/?appName=Cluster0`;
@@ -71,7 +83,6 @@ async function run() {
 
     // ====================== AUTH API ======================
 
-    // Create JWT Token
     app.post("/jwt", async (req, res) => {
       const user = req.body;
 
@@ -84,7 +95,6 @@ async function run() {
 
     // ====================== USERS API ======================
 
-    // Create new user (with bcrypt password hashing)
     app.post("/users", async (req, res) => {
       const userInfo = req.body;
 
@@ -96,13 +106,11 @@ async function run() {
         return res.status(400).send({ message: "User already exists" });
       }
 
-      // Hash password if provided
       if (userInfo.password) {
         const salt = await bcrypt.genSalt(10);
         userInfo.password = await bcrypt.hash(userInfo.password, salt);
       }
 
-      // Default role
       if (!userInfo.role) {
         userInfo.role = "user";
       }
@@ -111,7 +119,6 @@ async function run() {
       res.status(201).send(result);
     });
 
-    // Login with email + password (bcrypt compare)
     app.post("/login", async (req, res) => {
       const { email, password } = req.body;
 
@@ -133,14 +140,12 @@ async function run() {
         return res.status(401).send({ message: "Invalid password" });
       }
 
-      // Create JWT
       const token = jwt.sign(
         { email: user.email },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "7d" },
       );
 
-      // Don't send password to frontend
       const { password: pwd, ...userWithoutPassword } = user;
 
       res.send({
@@ -149,7 +154,6 @@ async function run() {
       });
     });
 
-    // Get single user
     app.get("/users/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
 
@@ -161,23 +165,20 @@ async function run() {
       }
 
       const user = await userCollection.findOne({ email });
-      // Remove password before sending
+
       if (user?.password) {
         delete user.password;
       }
+
       res.send(user);
     });
 
-    // Get all users (Admin only)
     app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
-
-      // Remove passwords
       const safeUsers = result.map(({ password, ...user }) => user);
       res.send(safeUsers);
     });
 
-    // Update user role (Admin only)
     app.patch("/users/role/:id", verifyToken, verifyAdmin, async (req, res) => {
       const { id } = req.params;
       const { role } = req.body;
@@ -188,6 +189,46 @@ async function run() {
       );
 
       res.send(result);
+    });
+
+    // ====================== DELETE USER (FIXED) ======================
+    app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
+      try {
+        const { id } = req.params;
+
+        // 1. Find user in MongoDB
+        const user = await userCollection.findOne({ _id: new ObjectId(id) });
+
+        if (!user) {
+          return res.status(404).send({ message: "User not found" });
+        }
+
+        // 2. Delete from Firebase Auth
+        try {
+          const firebaseUser = await auth.getUserByEmail(user.email);
+          await auth.deleteUser(firebaseUser.uid);
+          console.log("✅ Deleted from Firebase:", user.email);
+        } catch (firebaseError) {
+          console.log("⚠️ Firebase delete skipped:", firebaseError.message);
+        }
+
+        // 3. Delete user's quiz data
+        await searchInfoCollection.deleteMany({ email: user.email });
+
+        // 4. Delete from MongoDB
+        const result = await userCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+
+        res.send({
+          success: true,
+          deletedCount: result.deletedCount,
+          message: "User deleted from database and Firebase",
+        });
+      } catch (error) {
+        console.error("Delete user error:", error);
+        res.status(500).send({ message: "Failed to delete user" });
+      }
     });
 
     // ====================== AI QUIZ API ======================

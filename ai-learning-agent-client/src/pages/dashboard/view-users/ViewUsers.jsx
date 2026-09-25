@@ -3,6 +3,7 @@ import useAxios from "../../../hooks/useAxios";
 import { RiDeleteBin4Fill } from "react-icons/ri";
 import { FaUsers, FaUserShield, FaUserClock } from "react-icons/fa";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const ViewUsers = () => {
   const axiosInstance = useAxios();
@@ -27,7 +28,23 @@ const ViewUsers = () => {
   };
 
   const handleDelete = async (id) => {
-    console.log("Delete user:", id);
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This user will be deleted from database and Firebase!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete!",
+    });
+
+    if (result.isConfirmed) {
+      const res = await axiosInstance.delete(`/users/${id}`);
+      if (res.data.success || res.data.deletedCount > 0) {
+        Swal.fire("Deleted!", "User has been deleted.", "success");
+        refetch();
+      }
+    }
   };
 
   const filteredUsers = users.filter((user) => {
